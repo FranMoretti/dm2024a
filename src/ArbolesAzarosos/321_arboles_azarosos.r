@@ -16,9 +16,9 @@ PARAM$experimento <- 3510
 # parameetros rpart
 PARAM$rpart_param <- list(
   "cp" = -1,
-  "minsplit" = 250,
-  "minbucket" = 100,
-  "maxdepth" = 14
+  "minsplit" = 1000,
+  "minbucket" = 200,
+  "maxdepth" = 10
 )
 
 # parametros  arbol
@@ -37,7 +37,7 @@ setwd("C:/Users/franc/OneDrive/Escritorio/ITBA/00DataMining/") # Establezco el W
 
 #cargo MI semilla, que esta en MI bucket
 tabla_semillas <- fread( "./datasets/mis_semillas.txt" )
-ksemilla_azar <- tabla_semillas[ 1, semilla ]  # 1 es mi primer semilla
+ksemilla_azar <- tabla_semillas[ 1, Semilla ]  # 1 es mi primer semilla
 
 # cargo los datos
 dataset <- fread("./datasets/dataset_pequeno.csv")
@@ -82,30 +82,30 @@ set.seed(ksemilla_azar) # Establezco la semilla aleatoria
 
 for (arbolito in 1:PARAM$num_trees_max) {
   qty_campos_a_utilizar <- as.integer(length(campos_buenos)
-  * PARAM$feature_fraction)
-
+                                      * PARAM$feature_fraction)
+  
   campos_random <- sample(campos_buenos, qty_campos_a_utilizar)
-
+  
   # paso de un vector a un string con los elementos
   # separados por un signo de "+"
   # este hace falta para la formula
   campos_random <- paste(campos_random, collapse = " + ")
-
+  
   # armo la formula para rpart
   formulita <- paste0("clase_ternaria ~ ", campos_random)
-
+  
   # genero el arbol de decision
   modelo <- rpart(formulita,
-    data = dtrain,
-    xval = 0,
-    control = PARAM$rpart_param
+                  data = dtrain,
+                  xval = 0,
+                  control = PARAM$rpart_param
   )
-
+  
   # aplico el modelo a los datos que no tienen clase
   prediccion <- predict(modelo, dapply, type = "prob")
-
+  
   dapply[, prob_acumulada := prob_acumulada + prediccion[, "BAJA+2"]]
-
+  
   if (arbolito %in% grabar) {
     # Genero la entrega para Kaggle
     umbral_corte <- (1 / 40) * arbolito
@@ -113,17 +113,17 @@ for (arbolito in 1:PARAM$num_trees_max) {
       "numero_de_cliente" = dapply[, numero_de_cliente],
       "Predicted" = as.numeric(dapply[, prob_acumulada] > umbral_corte)
     )) # genero la salida
-
+    
     nom_arch <- paste0(
       "KA", PARAM$experimento, "_",
       sprintf("%.3d", arbolito), # para que tenga ceros adelante
       ".csv"
     )
     fwrite(entrega,
-      file = nom_arch,
-      sep = ","
+           file = nom_arch,
+           sep = ","
     )
-
+    
     cat(arbolito, " ")
   }
 }
