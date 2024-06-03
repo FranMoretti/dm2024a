@@ -11,19 +11,19 @@ require("rpart")
 
 # parmatros experimento
 PARAM <- list()
-PARAM$experimento <- 3510
+PARAM$experimento <- 3511
 
 # parameetros rpart
 PARAM$rpart_param <- list(
   "cp" = -1,
-  "minsplit" = 1000,
-  "minbucket" = 200,
-  "maxdepth" = 10
+  "minsplit" = 50,
+  "minbucket" = 5,
+  "maxdepth" = 14
 )
 
 # parametros  arbol
 # entreno cada arbol con solo 50% de las variables variables
-PARAM$feature_fraction <- 0.5
+PARAM$feature_fraction <- 0.8
 # voy a generar 500 arboles,
 #  a mas arboles mas tiempo de proceso y MEJOR MODELO,
 #  pero ganancias marginales
@@ -33,11 +33,11 @@ PARAM$num_trees_max <- 500
 #------------------------------------------------------------------------------
 # Aqui comienza el programa
 
-setwd("C:/Users/franc/OneDrive/Escritorio/ITBA/00DataMining/") # Establezco el Working Directory
+setwd("C:/Users/franc/Desktop/ITBA/00DataMining/") # Establezco el Working Directory
 
 #cargo MI semilla, que esta en MI bucket
 tabla_semillas <- fread( "./datasets/mis_semillas.txt" )
-ksemilla_azar <- tabla_semillas[ 1, Semilla ]  # 1 es mi primer semilla
+ksemilla_azar <- tabla_semillas[ 1, semilla ]  # 1 es mi primer semilla
 
 # cargo los datos
 dataset <- fread("./datasets/dataset_pequeno.csv")
@@ -54,8 +54,8 @@ setwd(carpeta_experimento)
 
 
 # que tamanos de ensemble grabo a disco, pero siempre debo generar los 500
+#grabar <- c(100, 200)
 grabar <- c(1, 5, 10, 50, 100, 200, 500)
-
 
 # defino los dataset de entrenamiento y aplicacion
 dtrain <- dataset[foto_mes == 202107]
